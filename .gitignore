@@ -1,0 +1,18 @@
+# Build
+/build
+/app/build
+/app/release
+.gradle
+*.apk
+*.aab
+
+# Android Studio / IDE
+.idea/
+*.iml
+local.properties
+.cxx
+
+# Signature — NE PAS committer la clé ni les mots de passe
+keystore.properties
+*.jks
+*.keystore

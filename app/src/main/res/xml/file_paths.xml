@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Expose le dossier de téléchargement privé de l'app pour l'installateur APK. -->
+    <external-files-path name="apk_download" path="Download/" />
+</paths>
