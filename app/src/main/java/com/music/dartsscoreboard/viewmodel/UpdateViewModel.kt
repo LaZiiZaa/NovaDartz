@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.Settings
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -45,14 +46,23 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
         checkForUpdate()
     }
 
-    fun checkForUpdate() {
+    fun checkForUpdate(manual: Boolean = false) {
         if (BuildConfig.GITHUB_REPO.isBlank()) return
         viewModelScope.launch {
-            val rel = UpdateChecker.fetchLatest(BuildConfig.GITHUB_REPO) ?: return@launch
-            if (UpdateChecker.isNewer(BuildConfig.VERSION_NAME, rel.versionName)) {
-                _state.update { it.copy(release = rel, visible = true) }
+            val rel = UpdateChecker.fetchLatest(BuildConfig.GITHUB_REPO)
+            when {
+                rel != null && UpdateChecker.isNewer(BuildConfig.VERSION_NAME, rel.versionName) ->
+                    _state.update { it.copy(release = rel, visible = true) }
+                manual && rel == null ->
+                    toast("Impossible de vérifier les mises à jour (connexion ?).")
+                manual ->
+                    toast("NovaDartz est à jour ✓ (v${BuildConfig.VERSION_NAME})")
             }
         }
+    }
+
+    private fun toast(text: String) {
+        Toast.makeText(getApplication(), text, Toast.LENGTH_SHORT).show()
     }
 
     fun dismiss() {

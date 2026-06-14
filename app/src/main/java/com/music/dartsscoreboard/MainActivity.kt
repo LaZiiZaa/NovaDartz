@@ -113,7 +113,8 @@ fun DartsApp() {
                         }
                     },
                     onViewHistory = { navController.navigate("history") },
-                    onViewStats = { navController.navigate("stats") }
+                    onViewStats = { navController.navigate("stats") },
+                    onCheckUpdate = { updateViewModel.checkForUpdate(manual = true) }
                 )
             }
 

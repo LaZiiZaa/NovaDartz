@@ -16,13 +16,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.music.dartsscoreboard.BuildConfig
 import com.music.dartsscoreboard.data.SavedPlayerEntity
 import com.music.dartsscoreboard.model.GameType
 import com.music.dartsscoreboard.ui.theme.*
+
+private const val GITHUB_URL = "https://github.com/LaZiiZaa/NovaDartz"
 
 @Composable
 fun HomeScreen(
@@ -32,7 +37,8 @@ fun HomeScreen(
     onRenamePlayer: (Long, String) -> Unit,
     onStartGame: (GameType, List<String>, Boolean, Boolean) -> Unit,
     onViewHistory: () -> Unit,
-    onViewStats: () -> Unit
+    onViewStats: () -> Unit,
+    onCheckUpdate: () -> Unit = {}
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
     var selectedGameType by remember { mutableStateOf(GameType.FIVE_O_ONE) }
@@ -65,6 +71,7 @@ fun HomeScreen(
     }
 
     if (showAboutDialog) {
+        val uriHandler = LocalUriHandler.current
         AlertDialog(
             onDismissRequest = { showAboutDialog = false },
             confirmButton = {
@@ -72,22 +79,55 @@ fun HomeScreen(
                     Text("Fermer", color = StarGold, fontWeight = FontWeight.Bold)
                 }
             },
+            icon = {
+                Icon(Icons.Default.SportsEsports, contentDescription = null, tint = StarGold, modifier = Modifier.size(28.dp))
+            },
             title = {
-                Text("NovaDartz", fontWeight = FontWeight.ExtraBold, color = StarGold)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("NovaDartz", fontWeight = FontWeight.ExtraBold, color = StarGold)
+                    Text(
+                        "Version ${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = NovaTextMuted
+                    )
+                }
             },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text(
-                        "Application de scoreboard pour fléchettes.",
-                        style = MaterialTheme.typography.bodyMedium
+                        "Application de scoreboard pour fléchettes, pensée pour jouer entre amis avec un suivi complet de vos performances.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = NovaTextSecondary
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text("Créateur", style = MaterialTheme.typography.labelLarge, color = NovaCyan)
-                    Text("Julien V", style = MaterialTheme.typography.bodyMedium)
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text("Licence", style = MaterialTheme.typography.labelLarge, color = NovaCoral)
+
+                    AboutSection("Fonctionnalités", NovaViolet)
+                    AboutFeature(Icons.Default.SportsEsports, "5 modes : X01, Cricket, Around the Clock, Count Up, Killer")
+                    AboutFeature(Icons.Default.Groups, "Mode équipe (2 contre 2)")
+                    AboutFeature(Icons.Default.BarChart, "Statistiques détaillées : records, comparaisons, graphiques")
+                    AboutFeature(Icons.Default.History, "Historique complet des parties")
+                    AboutFeature(Icons.Default.Save, "Reprise automatique d'une partie en cours")
+                    AboutFeature(Icons.Default.SystemUpdate, "Mises à jour automatiques")
+
+                    AboutSection("Liens", NovaCyan)
+                    AboutLink(Icons.Default.Code, "Code source sur GitHub") { uriHandler.openUri(GITHUB_URL) }
+                    AboutLink(Icons.Default.SystemUpdate, "Vérifier les mises à jour") {
+                        showAboutDialog = false
+                        onCheckUpdate()
+                    }
+
+                    AboutSection("Créateur", StarGold)
+                    Text("Julien V", style = MaterialTheme.typography.bodyMedium, color = NovaTextPrimary)
+
+                    AboutSection("Remerciements", NovaGreen)
                     Text(
-                        "Toute republication, redistribution ou copie de cette application, en tout ou en partie, est strictement interdite sans l'autorisation écrite préalable du créateur.",
+                        "Conçu avec Jetpack Compose. Merci à tous les testeurs et joueurs !",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = NovaTextSecondary
+                    )
+
+                    AboutSection("Licence", NovaCoral)
+                    Text(
+                        "© ${currentYear()} Julien V. Tous droits réservés.\n\nToute republication, redistribution ou copie de cette application, en tout ou en partie, est strictement interdite sans l'autorisation écrite préalable du créateur.",
                         style = MaterialTheme.typography.bodySmall,
                         color = NovaTextSecondary
                     )
@@ -488,3 +528,49 @@ private fun novaTextFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedContainerColor = Color(0x0AFFFFFF),
     unfocusedContainerColor = Color(0x0AFFFFFF)
 )
+
+// ---- Éléments du dialogue « À propos » ----
+
+@Composable
+private fun AboutSection(title: String, accent: Color) {
+    Spacer(modifier = Modifier.height(14.dp))
+    Text(title, style = MaterialTheme.typography.labelLarge, color = accent)
+    Spacer(modifier = Modifier.height(6.dp))
+}
+
+@Composable
+private fun AboutFeature(icon: ImageVector, text: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = NovaCyan, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(text, style = MaterialTheme.typography.bodySmall, color = NovaTextPrimary)
+    }
+}
+
+@Composable
+private fun AboutLink(icon: ImageVector, text: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = NovaCyan, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = NovaCyan,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = NovaTextMuted, modifier = Modifier.size(18.dp))
+    }
+}
+
+private fun currentYear(): Int = java.time.Year.now().value
